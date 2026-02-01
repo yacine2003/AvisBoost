@@ -177,6 +177,10 @@ const stripeWebhook = async (req, res, next) => {
   // Gérer les différents types d'événements
   try {
     switch (event.type) {
+      case 'checkout.session.completed':
+        await handleCheckoutSessionCompleted(event.data.object);
+        break;
+
       case 'payment_intent.succeeded':
         await handlePaymentSuccess(event.data.object);
         break;
@@ -196,21 +200,115 @@ const stripeWebhook = async (req, res, next) => {
   }
 };
 
-// Gérer le succès du paiement
-const handlePaymentSuccess = async (paymentIntent) => {
-  const { orderId, userId } = paymentIntent.metadata;
+// Gérer la complétion d'une session Checkout Stripe
+const handleCheckoutSessionCompleted = async (session) => {
+  const { orderId, userId, orderNumber } = session.metadata;
+
+  console.log(`💳 Checkout session complétée pour la commande ${orderNumber}`);
 
   // Mettre à jour le paiement
-  await prisma.payment.update({
-    where: {
-      stripePaymentIntentId: paymentIntent.id,
-    },
+  try {
+    await prisma.payment.updateMany({
+      where: {
+        orderId: orderId,
+        status: 'PENDING',
+      },
+      data: {
+        status: 'SUCCEEDED',
+        stripePaymentIntentId: session.payment_intent || session.id,
+        paymentMethod: session.payment_method_types?.[0] || 'card',
+      },
+    });
+  } catch (error) {
+    console.error('⚠️  Erreur lors de la mise à jour du paiement:', error);
+  }
+
+  // Mettre à jour la commande
+  await prisma.order.update({
+    where: { id: orderId },
     data: {
-      status: 'SUCCEEDED',
-      paymentMethod: paymentIntent.payment_method_types[0],
-      stripeCustomerId: paymentIntent.customer,
+      paymentStatus: 'PAID',
+      status: 'PAID',
+      paymentId: session.payment_intent || session.id,
+      paidAt: new Date(),
     },
   });
+
+  // Créer le service actif
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+  });
+
+  // Vérifier si le service n'existe pas déjà
+  const existingService = await prisma.service.findFirst({
+    where: { orderId: orderId },
+  });
+
+  if (!existingService) {
+    await prisma.service.create({
+      data: {
+        userId: userId,
+        orderId: orderId,
+        serviceType: 'google_reviews',
+        status: 'ACTIVE',
+        totalCapacity: order.quantity,
+        usedCapacity: 0,
+      },
+    });
+  }
+
+  console.log(`✅ Paiement réussi pour la commande ${order.orderNumber}`);
+
+  // TODO: Envoyer email de confirmation
+  // TODO: Notification Discord si configuré
+};
+
+// Gérer le succès du paiement
+const handlePaymentSuccess = async (paymentIntent) => {
+  const { orderId, userId } = paymentIntent.metadata || {};
+
+  // Si pas de métadonnées, ignorer (déjà traité par checkout.session.completed)
+  if (!orderId || !userId) {
+    console.log('ℹ️  PaymentIntent sans métadonnées - Probablement déjà traité par checkout.session.completed');
+    return;
+  }
+
+  // Vérifier si la commande est déjà payée
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+  });
+
+  if (!order) {
+    console.error(`❌ Commande ${orderId} introuvable`);
+    return;
+  }
+
+  if (order.paymentStatus === 'PAID') {
+    console.log(`ℹ️  Commande ${order.orderNumber} déjà payée - Webhook ignoré`);
+    return;
+  }
+
+  // Mettre à jour le paiement si il existe
+  const existingPayment = await prisma.payment.findFirst({
+    where: {
+      orderId: orderId,
+      status: 'PENDING',
+    },
+  });
+
+  if (existingPayment) {
+    await prisma.payment.update({
+      where: {
+        id: existingPayment.id,
+      },
+      data: {
+        status: 'SUCCEEDED',
+        paymentMethod: paymentIntent.payment_method_types?.[0] || 'card',
+        stripeCustomerId: paymentIntent.customer,
+        stripePaymentIntentId: paymentIntent.id,
+      },
+    });
+  }
 
   // Mettre à jour la commande
   await prisma.order.update({
@@ -223,21 +321,24 @@ const handlePaymentSuccess = async (paymentIntent) => {
     },
   });
 
-  // Créer le service actif
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
+  // Créer le service actif si il n'existe pas déjà
+  const existingService = await prisma.service.findFirst({
+    where: { orderId: orderId },
   });
 
-  await prisma.service.create({
-    data: {
-      userId: userId,
-      orderId: orderId,
-      serviceType: 'google_reviews',
-      status: 'ACTIVE',
-      totalCapacity: order.quantity,
-      usedCapacity: 0,
-    },
-  });
+  if (!existingService) {
+    await prisma.service.create({
+      data: {
+        userId: userId,
+        orderId: orderId,
+        serviceType: 'google_reviews',
+        status: 'ACTIVE',
+        totalCapacity: order.quantity,
+        usedCapacity: 0,
+        startedAt: new Date(),
+      },
+    });
+  }
 
   console.log(`✅ Paiement réussi pour la commande ${order.orderNumber}`);
 

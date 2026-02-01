@@ -351,11 +351,41 @@ window.deleteOrder = async function(orderId) {
 // ==================== INITIALISATION ====================
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Vérifier si l'utilisateur est déjà connecté
-    if (TokenManager.exists()) {
+    // Gérer le retour de Stripe (payment success/cancelled)
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const orderId = urlParams.get('orderId');
+
+    if (paymentStatus === 'success' && TokenManager.exists()) {
+        // Paiement réussi
         showDashboard();
+        
+        // Attendre que le dashboard soit chargé avant d'afficher le message
+        setTimeout(() => {
+            alert('🎉 Paiement réussi !\n\nVotre commande a été confirmée. Vous allez recevoir vos avis dans les 48-72h.\n\nMerci de votre confiance !');
+        }, 500);
+        
+        // Nettoyer l'URL (enlever les paramètres)
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+    } else if (paymentStatus === 'cancelled' && TokenManager.exists()) {
+        // Paiement annulé
+        showDashboard();
+        
+        setTimeout(() => {
+            alert('❌ Paiement annulé\n\nVous pouvez réessayer le paiement depuis votre dashboard quand vous le souhaitez.');
+        }, 500);
+        
+        // Nettoyer l'URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
     } else {
-        showPage('authPage');
-        showLogin();
+        // Comportement normal (pas de retour Stripe)
+        if (TokenManager.exists()) {
+            showDashboard();
+        } else {
+            showPage('authPage');
+            showLogin();
+        }
     }
 });
