@@ -116,6 +116,29 @@
             width: 100%;
         }
 
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-nav-login {
+            background: transparent;
+            color: var(--primary);
+            padding: 10px 24px;
+            border-radius: 12px;
+            border: 2px solid var(--primary);
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-nav-login:hover {
+            background: var(--primary);
+            color: white;
+        }
+
         .btn-nav {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
@@ -960,7 +983,10 @@
                 <a href="#pricing">Tarifs</a>
                 <a href="#testimonials">Témoignages</a>
                 <a href="#contact">Contact</a>
-                <button class="btn-nav" onclick="showSignup()">Commencer</button>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-nav-login" onclick="window.location.href='app.html'">Se connecter</button>
+                <button class="btn-nav" onclick="window.location.href='app.html'">Commencer</button>
             </div>
             <div class="mobile-menu">☰</div>
         </div>
@@ -973,7 +999,7 @@
                 <h1>Transformez votre réputation Google en 48h ⚡</h1>
                 <p>Obtenez des avis 5 étoiles authentiques et boostez votre visibilité. Attirez plus de clients grâce à une réputation en ligne irréprochable.</p>
                 <div class="hero-buttons">
-                    <button class="btn-hero-primary" onclick="showSignup()">Commencer maintenant →</button>
+                    <button class="btn-hero-primary" onclick="window.location.href='app.html'">Commencer maintenant →</button>
                     <button class="btn-hero-secondary" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">Comment ça marche ?</button>
                 </div>
             </div>
@@ -1145,7 +1171,7 @@
                         <div class="price-feature">✓ Support client par email</div>
                         <div class="price-feature">✓ Dashboard de suivi</div>
                     </div>
-                    <button class="btn-price" onclick="showSignup()">Choisir Starter</button>
+                    <button class="btn-price" onclick="window.location.href='app.html'">Choisir Starter</button>
                 </div>
 
                 <div class="price-card popular">
@@ -1160,7 +1186,7 @@
                         <div class="price-feature">✓ Dashboard de suivi avancé</div>
                         <div class="price-feature">✓ Conseils personnalisés</div>
                     </div>
-                    <button class="btn-price" onclick="showSignup()">Choisir Pro</button>
+                    <button class="btn-price" onclick="window.location.href='app.html'">Choisir Pro</button>
                 </div>
 
                 <div class="price-card">
@@ -1174,7 +1200,7 @@
                         <div class="price-feature">✓ Dashboard premium</div>
                         <div class="price-feature">✓ Audit SEO local gratuit</div>
                     </div>
-                    <button class="btn-price" onclick="showSignup()">Choisir Business</button>
+                    <button class="btn-price" onclick="window.location.href='app.html'">Choisir Business</button>
                 </div>
             </div>
         </div>
@@ -1233,7 +1259,7 @@
             <h2>Prêt à booster votre réputation ? 🚀</h2>
             <p>Rejoignez plus de 8,500 entreprises qui ont déjà transformé leur présence en ligne</p>
             <div class="cta-buttons">
-                <button class="btn-hero-primary" onclick="showSignup()">Commencer gratuitement →</button>
+                <button class="btn-hero-primary" onclick="window.location.href='app.html'">Commencer gratuitement →</button>
                 <button class="btn-hero-secondary" onclick="alert('Support: contact@avisboost.fr • 01 23 45 67 89')">Parler à un expert</button>
             </div>
         </div>
@@ -1312,11 +1338,6 @@
                 }
             });
         });
-
-        // Show signup (will be connected to the full app later)
-        function showSignup() {
-            alert('🚀 Fonctionnalité de commande en cours d\'activation...\n\nVous allez pouvoir :\n• Créer votre compte\n• Choisir votre pack personnalisé\n• Payer en ligne de façon sécurisée\n• Suivre vos avis en temps réel\n\nContactez-nous : contact@avisboost.fr');
-        }
 
         // Animate on scroll
         const observerOptions = {
