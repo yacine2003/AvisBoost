@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achat d'Avis Google - Prototype</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .page {
+            display: none;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #4285F4, #3367D6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 32px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 12px;
+            color: #202124;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #5f6368;
+            font-size: 15px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #202124;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #dadce0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4285F4;
+            box-shadow: 0 0 0 3px rgba(66,133,244,0.1);
+        }
+
+        .quantity-selector {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .qty-btn {
+            padding: 16px 12px;
+            background: white;
+            border: 3px solid #dadce0;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #202124;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .qty-btn:hover {
+            border-color: #4285F4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66,133,244,0.2);
+        }
+
+        .qty-btn.selected {
+            background: linear-gradient(135deg, #4285F4, #3367D6);
+            border-color: #4285F4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(66,133,244,0.4);
+        }
+
+        .price-display {
+            background: linear-gradient(135deg, #f0f4ff, #e8f0ff);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 24px;
+            border: 2px solid #4285F4;
+        }
+
+        .price-label {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 8px;
+        }
+
+        .price-amount {
+            font-size: 36px;
+            font-weight: 800;
+            color: #4285F4;
+        }
+
+        .price-detail {
+            font-size: 13px;
+            color: #5f6368;
+            margin-top: 8px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+        }
+
+        .input-with-icon input {
+            padding-left: 48px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+
+        .btn:hover {
+            background: #3367D6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66,133,244,0.4);
+        }
+
+        .btn:disabled {
+            background: #dadce0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #4285F4;
+            border: 2px solid #4285F4;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(66,133,244,0.1);
+        }
+
+        .hint {
+            font-size: 13px;
+            color: #5f6368;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Paiement */
+        .payment-summary {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 15px;
+        }
+
+        .summary-item.highlight {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .summary-label {
+            color: #5f6368;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: #202124;
+        }
+
+        .summary-divider {
+            border-top: 2px solid #dadce0;
+            margin: 12px 0;
+        }
+
+        .summary-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: #4285F4;
+            padding-top: 12px;
+        }
+
+        .card-icons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 32px;
+            background: #f8f9fa;
+            border: 1px solid #dadce0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #5f6368;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            background: #f8f9fa;
+        }
+
+        .navbar {
+            background: white;
+            padding: 16px 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .nav-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4285F4, #3367D6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .btn-logout {
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid #dadce0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            border-color: #4285F4;
+            color: #4285F4;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px 40px;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #4285F4, #3367D6);
+            color: white;
+            padding: 32px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 24px rgba(66,133,244,0.3);
+        }
+
+        .welcome-banner h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .welcome-banner p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f8f9fa;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .order-info h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .google-link {
+            color: #4285F4;
+            font-size: 14px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .google-link:hover {
+            text-decoration: underline;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge.active {
+            background: rgba(251,188,4,0.15);
+            color: #f9ab00;
+        }
+
+        .status-badge.completed {
+            background: rgba(52,168,83,0.15);
+            color: #34A853;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .status-badge.active .status-dot {
+            background: #f9ab00;
+        }
+
+        .status-badge.completed .status-dot {
+            background: #34A853;
+        }
+
+        .progress-section {
+            margin-bottom: 32px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .progress-label {
+            font-size: 15px;
+            color: #5f6368;
+        }
+
+        .progress-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4285F4;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #f0f4ff;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4285F4, #3367D6);
+            border-radius: 20px;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            to { left: 100%; }
+        }
+
+        .reviews-section h4 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #202124;
+        }
+
+        .review-item {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .reviewer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .reviewer-info h5 {
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .review-date {
+            font-size: 12px;
+            color: #5f6368;
+        }
+
+        .stars {
+            color: #FBBC04;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #5f6368;
+        }
+
+        .empty-state svg {
+            margin-bottom: 20px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            display: none;
+            align-items: center;
+            gap: 16px;
+            max-width: 380px;
+            border-left: 5px solid #34A853;
+            animation: slideInRight 0.4s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(450px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notif-icon {
+            width: 40px;
+            height: 40px;
+            background: #34A853;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .notif-content h5 {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .notif-content p {
+            font-size: 13px;
+            color: #5f6368;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                padding: 28px 24px;
+            }
+            
+            .notification {
+                left: 20px;
+                right: 20px;
+            }
+            
+            .navbar {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .quantity-selector {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+            }
+
+            .qty-btn {
+                padding: 14px 8px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 1: INSCRIPTION -->
+    <div class="page active" id="signupPage">
+        <div class="card">
+            <div class="logo">⭐</div>
+            <h1>Créer un compte</h1>
+            <p class="subtitle">Commencez à booster votre réputation</p>
+            
+            <form id="signupForm">
+                <div class="form-group">
+                    <label>Nom complet</label>
+                    <input type="text" id="fullName" placeholder="Ex: Jean Dupont" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="votre@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn">Créer mon compte</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAGE 2: CONFIGURATION COMMANDE -->
+    <div class="page" id="configPage">
+        <div class="card">
+            <div class="logo">📦</div>
+            <h1>Configurez votre commande</h1>
+            <p class="subtitle">Choisissez le nombre d'avis et votre établissement</p>
+            
+            <form id="configForm">
+                <div class="form-group">
+                    <label>Nom de votre entreprise</label>
+                    <input type="text" id="companyName" 
+                           placeholder="Ex: Dupont Maçonnerie" 
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label>Type d'entreprise</label>
+                    <select id="companyType" required>
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="Maçon">Maçon</option>
+                        <option value="Restaurant">Restaurant</option>
+                        <option value="Coiffeur">Coiffeur / Salon de coiffure</option>
+                        <option value="Plombier">Plombier</option>
+                        <option value="Électricien">Électricien</option>
+                        <option value="Garage">Garage automobile</option>
+                        <option value="Boulangerie">Boulangerie / Pâtisserie</option>
+                        <option value="Médecin">Cabinet médical</option>
+                        <option value="Dentiste">Dentiste</option>
+                        <option value="Avocat">Cabinet d'avocat</option>
+                        <option value="Agence immobilière">Agence immobilière</option>
+                        <option value="Hôtel">Hôtel</option>
+                        <option value="Bar">Bar / Café</option>
+                        <option value="Gym">Salle de sport</option>
+                        <option value="Spa">Spa / Institut de beauté</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Nombre d'avis souhaités</label>
+                    <div class="quantity-selector">
+                        <div class="qty-btn" data-qty="10" data-price="89">10</div>
+                        <div class="qty-btn" data-qty="20" data-price="159">20</div>
+                        <div class="qty-btn" data-qty="30" data-price="219">30</div>
+                        <div class="qty-btn" data-qty="40" data-price="279">40</div>
+                        <div class="qty-btn" data-qty="50" data-price="329">50</div>
+                    </div>
+                </div>
+
+                <div class="price-display" id="priceDisplay" style="display: none;">
+                    <div class="price-label">Prix total</div>
+                    <div class="price-amount"><span id="displayPrice">0</span>€</div>
+                    <div class="price-detail"><span id="pricePerReview">0</span>€ par avis</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Lien Google Maps de votre établissement</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">📍</span>
+                        <input type="url" id="googleMapsLink" 
+                               placeholder="https://maps.google.com/..." 
+                               required>
+                    </div>
+                    <div class="hint">
+                        💡 Trouvez votre établissement sur Google Maps et copiez le lien
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="continueBtn" disabled>Continuer vers le paiement</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAGE 3: PAIEMENT -->
+    <div class="page" id="paymentPage">
+        <div class="card">
+            <div class="logo">💳</div>
+            <h1>Paiement sécurisé</h1>
+            <p class="subtitle">Finalisez votre commande</p>
+            
+            <div class="payment-summary">
+                <div class="summary-item highlight">
+                    <span class="summary-label">🏢 Entreprise</span>
+                    <span class="summary-value" id="paymentCompanyName">...</span>
+                </div>
+                <div class="summary-item highlight">
+                    <span class="summary-label">📋 Type</span>
+                    <span class="summary-value" id="paymentCompanyType">...</span>
+                </div>
+                <div class="summary-item highlight">
+                    <span class="summary-label">📍 Lien Google</span>
+                    <span class="summary-value" id="paymentLink" style="font-size: 12px;">...</span>
+                </div>
+                <div class="summary-divider"></div>
+                <div class="summary-item">
+                    <span class="summary-label">Nombre d'avis</span>
+                    <span class="summary-value"><span id="paymentQty">0</span> avis</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Prix unitaire</span>
+                    <span class="summary-value" id="paymentUnitPrice">0€</span>
+                </div>
+                <div class="summary-divider"></div>
+                <div class="summary-item">
+                    <span class="summary-label">Sous-total</span>
+                    <span class="summary-value" id="paymentSubtotal">0€</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">TVA (20%)</span>
+                    <span class="summary-value" id="paymentTax">0€</span>
+                </div>
+                <div class="summary-divider"></div>
+                <div class="summary-item summary-total">
+                    <span>Total à payer</span>
+                    <span id="paymentTotal">0€</span>
+                </div>
+            </div>
+            
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label>Numéro de carte</label>
+                    <input type="text" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label>Expiration</label>
+                        <input type="text" placeholder="MM/AA" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input type="text" placeholder="123" maxlength="3" required>
+                    </div>
+                </div>
+                <div class="card-icons">
+                    <div class="card-icon">VISA</div>
+                    <div class="card-icon">MC</div>
+                    <div class="card-icon">AMEX</div>
+                    <div class="card-icon">🔒 SSL</div>
+                </div>
+                <button type="submit" class="btn" style="margin-top: 24px;">Payer maintenant</button>
+                <button type="button" class="btn btn-secondary" id="backToConfig">Retour</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAGE 4: DASHBOARD -->
+    <div class="page dashboard" id="dashboardPage" style="padding: 0;">
+        <div style="width: 100%;">
+            <nav class="navbar">
+                <div class="nav-brand">
+                    <div class="nav-logo">⭐</div>
+                    <span>Dashboard Avis</span>
+                </div>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </nav>
+
+            <div class="container">
+                <div class="welcome-banner">
+                    <h2>Bienvenue, <span id="userName">Jean</span> ! 🎉</h2>
+                    <p>Vos avis sont en cours de livraison. Suivez la progression en temps réel.</p>
+                </div>
+
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-info">
+                            <h3><span id="dashCompanyName">Mon Entreprise</span></h3>
+                            <div style="margin-top: 6px; font-size: 14px; color: #5f6368;">
+                                📋 <span id="dashCompanyType">Type</span> • <span id="dashQty">0</span> avis commandés
+                            </div>
+                            <a href="#" class="google-link" id="dashLink" target="_blank">
+                                📍 Voir sur Google Maps →
+                            </a>
+                            <div style="margin-top: 8px; font-size: 13px; color: #5f6368;">
+                                Commande #<span id="orderId">CMD12345</span>
+                            </div>
+                        </div>
+                        <div class="status-badge active" id="statusBadge">
+                            <span class="status-dot"></span>
+                            <span id="statusText">En cours</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <div class="progress-header">
+                            <span class="progress-label">Progression de la livraison</span>
+                            <span class="progress-value"><span id="currentCount">0</span> / <span id="totalCount">0</span></span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="reviews-section">
+                        <h4>Avis reçus (<span id="reviewCount">0</span>)</h4>
+                        <div id="reviewsList">
+                            <div class="empty-state">
+                                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#dadce0" stroke-width="1.5">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                </svg>
+                                <p>Les avis arrivent progressivement...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div class="notif-icon">🎉</div>
+        <div class="notif-content">
+            <h5 id="notifTitle">Nouvel avis reçu !</h5>
+            <p id="notifMessage">Un avis vient d'être ajouté.</p>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let selectedQty = null;
+        let selectedPrice = null;
+        let googleMapsLink = '';
+        let companyName = '';
+        let companyType = '';
+        let userName = '';
+        let orderId = 'CMD' + Math.floor(Math.random() * 100000);
+        let reviewInterval = null;
+        let currentReviews = 0;
+        let totalReviews = 0;
+
+        const reviewers = [
+            'Marie Dubois', 'Pierre Martin', 'Sophie Laurent', 'Thomas Bernard',
+            'Julie Petit', 'Alexandre Robert', 'Camille Durand', 'Lucas Moreau',
+            'Emma Simon', 'Nicolas Michel', 'Léa Leroy', 'Antoine Fournier',
+            'Chloé Girard', 'Maxime Bonnet', 'Sarah Mercier', 'Hugo Blanc'
+        ];
+
+        const reviewTexts = [
+            'Excellent service, très professionnel !',
+            'Je recommande vivement, équipe au top.',
+            'Très satisfait de ma visite, merci !',
+            'Service impeccable, je reviendrai.',
+            'Super expérience, personnel accueillant.',
+            'Qualité au rendez-vous, bravo !',
+            'Parfait, rien à redire !',
+            'Très bonne prestation, merci beaucoup.',
+            'Je suis ravi, excellent travail.',
+            'Service rapide et efficace.',
+            'Équipe sympathique et compétente.',
+            'Très professionnel, je recommande.'
+        ];
+
+        // PAGE 1: INSCRIPTION
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            userName = document.getElementById('fullName').value.split(' ')[0];
+            showPage('configPage');
+        });
+
+        // PAGE 2: CONFIGURATION
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.qty-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedQty = parseInt(this.dataset.qty);
+                selectedPrice = parseInt(this.dataset.price);
+                updatePriceDisplay();
+                checkConfigForm();
+            });
+        });
+
+        document.getElementById('googleMapsLink').addEventListener('input', checkConfigForm);
+        document.getElementById('companyName').addEventListener('input', checkConfigForm);
+        document.getElementById('companyType').addEventListener('change', checkConfigForm);
+
+        function updatePriceDisplay() {
+            document.getElementById('priceDisplay').style.display = 'block';
+            document.getElementById('displayPrice').textContent = selectedPrice;
+            document.getElementById('pricePerReview').textContent = (selectedPrice / selectedQty).toFixed(2);
+        }
+
+        function checkConfigForm() {
+            const linkInput = document.getElementById('googleMapsLink');
+            const nameInput = document.getElementById('companyName');
+            const typeInput = document.getElementById('companyType');
+            const continueBtn = document.getElementById('continueBtn');
+            
+            if (selectedQty && linkInput.value.trim() && nameInput.value.trim() && typeInput.value) {
+                continueBtn.disabled = false;
+            } else {
+                continueBtn.disabled = true;
+            }
+        }
+
+        document.getElementById('configForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            googleMapsLink = document.getElementById('googleMapsLink').value;
+            companyName = document.getElementById('companyName').value;
+            companyType = document.getElementById('companyType').value;
+            updatePaymentSummary();
+            showPage('paymentPage');
+        });
+
+        document.getElementById('backToConfig').addEventListener('click', function() {
+            showPage('configPage');
+        });
+
+        // PAGE 3: PAIEMENT
+        function updatePaymentSummary() {
+            const tax = selectedPrice * 0.2;
+            const total = selectedPrice + tax;
+            
+            // Raccourcir le lien pour l'affichage
+            const shortLink = googleMapsLink.length > 35 ? 
+                googleMapsLink.substring(0, 35) + '...' : googleMapsLink;
+            
+            document.getElementById('paymentCompanyName').textContent = companyName;
+            document.getElementById('paymentCompanyType').textContent = companyType;
+            document.getElementById('paymentLink').textContent = shortLink;
+            document.getElementById('paymentQty').textContent = selectedQty;
+            document.getElementById('paymentUnitPrice').textContent = (selectedPrice / selectedQty).toFixed(2) + '€';
+            document.getElementById('paymentSubtotal').textContent = selectedPrice + '€';
+            document.getElementById('paymentTax').textContent = tax.toFixed(2) + '€';
+            document.getElementById('paymentTotal').textContent = total.toFixed(2) + '€';
+        }
+
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            this.querySelector('.btn').textContent = 'Traitement du paiement...';
+            setTimeout(function() {
+                startDashboard();
+            }, 1500);
+        });
+
+        // PAGE 4: DASHBOARD
+        function startDashboard() {
+            totalReviews = selectedQty;
+            currentReviews = 0;
+            
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('orderId').textContent = orderId;
+            document.getElementById('dashCompanyName').textContent = companyName;
+            document.getElementById('dashCompanyType').textContent = companyType;
+            document.getElementById('dashQty').textContent = totalReviews;
+            document.getElementById('dashLink').href = googleMapsLink;
+            document.getElementById('totalCount').textContent = totalReviews;
+            document.getElementById('currentCount').textContent = '0';
+            
+            showPage('dashboardPage');
+            
+            setTimeout(function() {
+                addReviewsProgressively();
+            }, 2000);
+        }
+
+        function addReviewsProgressively() {
+            reviewInterval = setInterval(function() {
+                if (currentReviews < totalReviews) {
+                    addNewReview();
+                } else {
+                    clearInterval(reviewInterval);
+                    completeOrder();
+                }
+            }, Math.random() * 2000 + 3000);
+        }
+
+        function addNewReview() {
+            currentReviews++;
+            
+            const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+            const reviewText = reviewTexts[Math.floor(Math.random() * reviewTexts.length)];
+            const initials = reviewer.split(' ').map(n => n[0]).join('');
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+            const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            
+            document.getElementById('currentCount').textContent = currentReviews;
+            document.getElementById('reviewCount').textContent = currentReviews;
+            
+            const percentage = (currentReviews / totalReviews) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            
+            if (currentReviews === 1) {
+                document.getElementById('reviewsList').innerHTML = '';
+            }
+            
+            const reviewHTML = `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="reviewer">
+                            <div class="avatar">${initials}</div>
+                            <div class="reviewer-info">
+                                <h5>${reviewer}</h5>
+                                <div class="review-date">${dateStr} à ${timeStr}</div>
+                            </div>
+                        </div>
+                        <div class="stars">⭐⭐⭐⭐⭐</div>
+                    </div>
+                    <div>${reviewText}</div>
+                </div>
+            `;
+            
+            document.getElementById('reviewsList').insertAdjacentHTML('afterbegin', reviewHTML);
+            showNotification('Nouvel avis reçu !', `${reviewer} a laissé un avis 5⭐`);
+        }
+
+        function completeOrder() {
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.classList.remove('active');
+            statusBadge.classList.add('completed');
+            document.getElementById('statusText').textContent = 'Terminé';
+            showNotification('Commande terminée ! 🎉', `Tous vos ${totalReviews} avis ont été livrés avec succès.`);
+        }
+
+        function showNotification(title, message) {
+            const notification = document.getElementById('notification');
+            document.getElementById('notifTitle').textContent = title;
+            document.getElementById('notifMessage').textContent = message;
+            notification.style.display = 'flex';
+            setTimeout(function() {
+                notification.style.display = 'none';
+            }, 4000);
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+                clearInterval(reviewInterval);
+                currentReviews = 0;
+                selectedQty = null;
+                showPage('signupPage');
+            }
+        });
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+    </script>
+
+</body>
+</html>
