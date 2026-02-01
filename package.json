@@ -1,0 +1,38 @@
+{
+  "name": "avisboost",
+  "version": "1.0.0",
+  "description": "Plateforme de gestion d'avis Google - AvisBoost",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:bot": "cd discord-bot && npm install",
+    "install:all": "npm run install:backend && npm run install:bot",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:bot": "cd discord-bot && npm run dev",
+    "dev:frontend": "cd frontend/public && npx serve .",
+    "start:backend": "cd backend && npm start",
+    "start:bot": "cd discord-bot && npm start",
+    "prisma:generate": "cd backend && npx prisma generate",
+    "prisma:migrate": "cd backend && npx prisma migrate dev",
+    "prisma:studio": "cd backend && npx prisma studio",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/votre-username/avisboost.git"
+  },
+  "keywords": [
+    "avis",
+    "google",
+    "reviews",
+    "reputation",
+    "management"
+  ],
+  "author": "AvisBoost Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/votre-username/avisboost/issues"
+  },
+  "homepage": "https://github.com/votre-username/avisboost#readme"
+}

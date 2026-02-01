@@ -1,0 +1,25 @@
+{
+  "name": "avisboost-discord-bot",
+  "version": "1.0.0",
+  "description": "Bot Discord pour AvisBoost",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "dev": "nodemon src/bot.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "avisboost"
+  ],
+  "author": "AvisBoost Team",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.0",
+    "axios": "^1.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
