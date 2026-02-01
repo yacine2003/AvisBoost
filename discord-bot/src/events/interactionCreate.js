@@ -16,17 +16,29 @@ module.exports = {
         await command.execute(interaction);
         console.log(`✅ Commande /${interaction.commandName} exécutée par ${interaction.user.tag}`);
       } catch (error) {
+        // Ignorer les erreurs d'interaction déjà répondue ou expirée (normal en mode global)
+        if (error.code === 10062 || error.code === 40060) {
+          console.log(`⚠️  /${interaction.commandName} - Interaction expirée (ignoré - normal en mode global)`);
+          return;
+        }
+        
+        // Autres erreurs : afficher le détail
         console.error(`❌ Erreur lors de l'exécution de /${interaction.commandName}:`, error);
         
         const errorMessage = {
           content: '❌ Une erreur est survenue lors de l\'exécution de cette commande.',
-          ephemeral: true,
+          flags: 64, // Ephemeral flag
         };
 
-        if (interaction.replied || interaction.deferred) {
-          await interaction.followUp(errorMessage);
-        } else {
-          await interaction.reply(errorMessage);
+        try {
+          if (interaction.replied || interaction.deferred) {
+            await interaction.followUp(errorMessage);
+          } else {
+            await interaction.reply(errorMessage);
+          }
+        } catch (replyError) {
+          // Interaction déjà expirée, on ignore
+          console.log('⚠️  Impossible de répondre à l\'interaction');
         }
       }
     }

@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const axios = require('axios');
+const { apiClient } = require('../utils/apiClient');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -40,35 +41,43 @@ module.exports = {
         .setRequired(true)),
 
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: 64 }); // Ephemeral
 
     try {
+      // Vérifier si l'utilisateur est connecté
+      const token = apiClient.getUserToken(interaction.user.id);
+      
+      if (!token) {
+        return await interaction.editReply({
+          content: '❌ **Vous devez vous connecter d\'abord !**\n\nUtilisez la commande `/login` avec vos identifiants AvisBoost.\n\nExemple:\n```/login email:votre@email.com password:VotreMotDePasse```',
+        });
+      }
+
       const companyName = interaction.options.getString('entreprise');
       const companyType = interaction.options.getString('type');
       const quantity = interaction.options.getInteger('quantite');
       const googleMapsLink = interaction.options.getString('lien');
 
-      // Calculer le prix
-      const prices = {
-        10: { price: 89, tax: 17.8 },
-        20: { price: 159, tax: 31.8 },
-        30: { price: 219, tax: 43.8 },
-        40: { price: 279, tax: 55.8 },
-        50: { price: 329, tax: 65.8 },
+      // Créer la commande via l'API
+      const orderData = {
+        companyName,
+        companyType,
+        quantity,
+        googleMapsLink,
       };
 
-      const pricing = prices[quantity];
-      const total = pricing.price + pricing.tax;
+      const response = await apiClient.createOrder(token, orderData);
 
-      // TODO: Appeler l'API backend pour créer la commande
-      // Pour l'instant, créer une commande simulée
+      if (!response.success) {
+        throw new Error(response.message || 'Erreur lors de la création de la commande');
+      }
 
-      const orderNumber = 'CMD' + Math.floor(10000 + Math.random() * 90000);
+      const order = response.data;
 
       const embed = new EmbedBuilder()
         .setColor(0x667eea)
         .setTitle('🎉 Commande créée avec succès !')
-        .setDescription(`Votre commande **${orderNumber}** a été créée.`)
+        .setDescription(`Votre commande **${order.orderNumber}** a été créée.`)
         .addFields(
           {
             name: '🏢 Entreprise',
@@ -82,7 +91,7 @@ module.exports = {
           },
           {
             name: '💰 Prix',
-            value: `${total.toFixed(2)}€ TTC`,
+            value: `${order.total}€ TTC`,
             inline: true,
           },
           {
@@ -117,7 +126,7 @@ module.exports = {
           },
           {
             name: 'Commande',
-            value: orderNumber,
+            value: order.orderNumber,
             inline: true,
           },
           {
@@ -139,9 +148,18 @@ module.exports = {
 
     } catch (error) {
       console.error('Erreur commande /order:', error);
-      await interaction.editReply({
-        content: '❌ Une erreur est survenue lors de la création de la commande.',
-      });
+      
+      // Vérifier si c'est une erreur d'authentification
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        await interaction.editReply({
+          content: '❌ **Session expirée**\n\nVeuillez vous reconnecter avec `/login`.',
+        });
+      } else {
+        const errorMsg = error.response?.data?.message || error.message || 'Erreur inconnue';
+        await interaction.editReply({
+          content: `❌ **Erreur lors de la création de la commande**\n\n${errorMsg}`,
+        });
+      }
     }
   },
 };

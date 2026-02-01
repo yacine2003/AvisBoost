@@ -12,6 +12,11 @@ module.exports = {
       .setDescription('Voici toutes les commandes disponibles pour gérer vos avis Google :')
       .addFields(
         {
+          name: '🔐 /login',
+          value: 'Connecter votre compte AvisBoost\n`/login email:<votre@email.com> password:<motdepasse>`',
+          inline: false,
+        },
+        {
           name: '📝 /order',
           value: 'Créer une nouvelle commande d\'avis Google\n`/order entreprise:<nom> type:<type> quantite:<nb> lien:<url>`',
           inline: false,
@@ -38,7 +43,7 @@ module.exports = {
         },
         {
           name: '\u200B',
-          value: '**🔗 Liens utiles**\n[Dashboard](https://avisboost.com/dashboard) • [Support](https://avisboost.com/support) • [Documentation](https://avisboost.com/docs)',
+          value: '**💡 Note importante**\nVous devez d\'abord vous connecter avec `/login` avant d\'utiliser les autres commandes.',
           inline: false,
         }
       )
@@ -49,7 +54,7 @@ module.exports = {
 
     await interaction.reply({
       embeds: [embed],
-      ephemeral: true,
+      flags: 64, // Ephemeral
     });
   },
 };

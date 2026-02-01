@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const axios = require('axios');
+const { apiClient } = require('../utils/apiClient');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -15,9 +15,18 @@ module.exports = {
         .setRequired(true)),
 
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: 64 }); // Ephemeral
 
     try {
+      // Vérifier si l'utilisateur est connecté
+      const token = apiClient.getUserToken(interaction.user.id);
+      
+      if (!token) {
+        return await interaction.editReply({
+          content: '❌ **Vous devez vous connecter d\'abord !**\n\nUtilisez la commande `/login` avec vos identifiants AvisBoost.\n\nExemple:\n```/login email:votre@email.com password:VotreMotDePasse```',
+        });
+      }
+
       const listName = interaction.options.getString('nom');
       const clientsInput = interaction.options.getString('clients');
 
@@ -38,9 +47,13 @@ module.exports = {
         });
       }
 
-      // TODO: Appeler l'API backend pour enregistrer la liste
-      // Pour l'instant, simuler la réponse
-      
+      // Appeler l'API backend pour enregistrer la liste
+      const response = await apiClient.createClientList(token, listName, clientsArray);
+
+      if (!response.success) {
+        throw new Error(response.message || 'Erreur lors de la création de la liste');
+      }
+
       const embed = {
         color: 0x667eea,
         title: '✅ Liste de clients créée',
@@ -106,9 +119,18 @@ module.exports = {
 
     } catch (error) {
       console.error('Erreur commande /addlist:', error);
-      await interaction.editReply({
-        content: '❌ Une erreur est survenue lors de la création de la liste.',
-      });
+      
+      // Vérifier si c'est une erreur d'authentification
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        await interaction.editReply({
+          content: '❌ **Session expirée**\n\nVeuillez vous reconnecter avec `/login`.',
+        });
+      } else {
+        const errorMsg = error.response?.data?.message || error.message || 'Erreur inconnue';
+        await interaction.editReply({
+          content: `❌ **Erreur lors de la création de la liste**\n\n${errorMsg}`,
+        });
+      }
     }
   },
 };
