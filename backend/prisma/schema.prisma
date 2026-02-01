@@ -97,6 +97,7 @@ model Order {
   status          OrderStatus   @default(PENDING)
   paymentStatus   PaymentStatus @default(UNPAID) @map("payment_status")
   paymentId       String?       @map("payment_id")
+  reviewProofLink String?       @map("review_proof_link") // Lien vers l'avis Google (preuve pour le client)
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
   paidAt          DateTime?     @map("paid_at")

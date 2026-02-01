@@ -55,7 +55,16 @@ async function handleLogin(event) {
         const response = await api.login(email, password);
         
         if (response.success) {
-            showDashboard();
+            // Vérifier si l'utilisateur est admin
+            const userInfo = response.data.user;
+            
+            if (userInfo.role === 'ADMIN') {
+                // Rediriger vers l'interface admin
+                window.location.href = 'admin.html';
+            } else {
+                // Afficher le dashboard client
+                showDashboard();
+            }
         }
     } catch (error) {
         showError('loginError', error.message || 'Erreur de connexion');
@@ -238,7 +247,23 @@ async function loadOrders() {
                                 ${getStatusText(order.status)}
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #dadce0;">
+                        
+                        ${order.reviewProofLink ? `
+                            <div style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); padding: 16px; border-radius: 8px; margin-top: 12px; border-left: 4px solid #4caf50;">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                    <span style="font-size: 24px;">✅</span>
+                                    <strong style="color: #2e7d32;">Preuve d'avis disponible</strong>
+                                </div>
+                                <p style="font-size: 13px; color: #1b5e20; margin-bottom: 12px;">
+                                    Votre avis a été publié ! Cliquez ci-dessous pour le consulter sur Google.
+                                </p>
+                                <a href="${order.reviewProofLink}" target="_blank" class="btn" style="background: #4caf50; color: white; display: inline-block;">
+                                    🔗 Voir l'avis sur Google
+                                </a>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #dadce0; margin-top: 12px;">
                             <div style="font-size: 14px; color: #5f6368;">
                                 ${new Date(order.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
                             </div>
@@ -350,7 +375,22 @@ window.deleteOrder = async function(orderId) {
 
 // ==================== INITIALISATION ====================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Vérifier d'abord si l'utilisateur est admin et le rediriger
+    if (TokenManager.exists()) {
+        try {
+            const userResponse = await api.request('/users/profile');
+            if (userResponse.success && userResponse.data.role === 'ADMIN') {
+                // C'est un admin, rediriger vers l'interface admin
+                window.location.href = 'admin.html';
+                return;
+            }
+        } catch (error) {
+            // Si erreur, continuer normalement (token invalide sera géré après)
+            console.log('Erreur vérification admin:', error);
+        }
+    }
+    
     // Gérer le retour de Stripe (payment success/cancelled)
     const urlParams = new URLSearchParams(window.location.search);
     const paymentStatus = urlParams.get('payment');

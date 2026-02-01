@@ -12,6 +12,7 @@ const ordersRoutes = require('./routes/orders.routes');
 const paymentsRoutes = require('./routes/payments.routes');
 const servicesRoutes = require('./routes/services.routes');
 const clientListsRoutes = require('./routes/clientlists.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 // Import des middlewares
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
@@ -76,6 +77,7 @@ app.use('/api/orders', ordersRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/services', servicesRoutes);
 app.use('/api/clientlists', clientListsRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ==================== ERROR HANDLERS ====================
 

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvisBoost - Admin</title>
+    <link rel="stylesheet" href="public/css/admin.css">
+</head>
+<body>
+    <!-- PAGE: ADMIN DASHBOARD -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">⭐</span>
+                <span class="logo-text">AvisBoost Admin</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-view="dashboard">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-view="orders">
+                    <span class="icon">📦</span>
+                    <span>Commandes</span>
+                </a>
+                <a href="#" class="nav-item" data-view="users">
+                    <span class="icon">👥</span>
+                    <span>Utilisateurs</span>
+                </a>
+                <a href="#" class="nav-item" onclick="logout(); return false;">
+                    <span class="icon">🚪</span>
+                    <span>Déconnexion</span>
+                </a>
+            </nav>
+            
+            <div class="user-info">
+                <div class="user-avatar">👤</div>
+                <div class="user-details">
+                    <div class="user-name" id="adminName">Admin</div>
+                    <div class="user-email" id="adminEmail">admin@avisboost.com</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <div class="view active" id="dashboardView">
+                <header class="content-header">
+                    <h1>📊 Dashboard</h1>
+                    <p class="subtitle">Vue d'ensemble de l'activité</p>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Commandes totales</div>
+                            <div class="stat-value" id="statTotalOrders">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="cursor: pointer;" onclick="showOrdersView('IN_PROGRESS')">
+                        <div class="stat-icon">🔄</div>
+                        <div class="stat-content">
+                            <div class="stat-label">En cours</div>
+                            <div class="stat-value" id="statActiveOrders">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="cursor: pointer;" onclick="showOrdersView('COMPLETED')">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Complétées</div>
+                            <div class="stat-value" id="statCompletedOrders">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">💵</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Revenu total</div>
+                            <div class="stat-value" id="statTotalRevenue">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="cursor: pointer;" onclick="showUsersView()">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Utilisateurs</div>
+                            <div class="stat-value" id="statTotalUsers">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders View -->
+            <div class="view" id="ordersView">
+                <header class="content-header">
+                    <div>
+                        <h1>📦 Gestion des commandes</h1>
+                        <p class="subtitle">Gérer les commandes et ajouter les preuves d'avis</p>
+                    </div>
+                    <button class="btn-refresh" onclick="loadOrders()">🔄 Actualiser</button>
+                </header>
+
+                <!-- Filtres -->
+                <div class="filters-bar">
+                    <input type="text" id="searchInput" placeholder="🔍 Rechercher (N° commande, entreprise, email...)" onkeyup="debounceSearch()">
+                    
+                    <select id="statusFilter" onchange="loadOrders()">
+                        <option value="">Tous les statuts</option>
+                        <option value="PAID">Payée</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="COMPLETED">Complétée</option>
+                    </select>
+                </div>
+
+                <!-- Liste des commandes -->
+                <div class="orders-container" id="ordersContainer">
+                    <div class="loading">Chargement...</div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination"></div>
+            </div>
+
+            <!-- Users View -->
+            <div class="view" id="usersView">
+                <header class="content-header">
+                    <div>
+                        <h1>👥 Gestion des utilisateurs</h1>
+                        <p class="subtitle">Liste de tous les clients inscrits</p>
+                    </div>
+                    <button class="btn-refresh" onclick="loadUsers()">🔄 Actualiser</button>
+                </header>
+
+                <!-- Barre de recherche -->
+                <div class="filters-bar">
+                    <input type="text" id="userSearchInput" placeholder="🔍 Rechercher (nom, email...)" onkeyup="debounceUserSearch()">
+                </div>
+
+                <!-- Liste des utilisateurs -->
+                <div class="orders-container" id="usersContainer">
+                    <div class="loading">Chargement...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal pour éditer le lien d'avis -->
+    <div class="modal" id="editReviewLinkModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Ajouter le lien de l'avis</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Commande:</strong> <span id="modalOrderNumber"></span></p>
+                <p><strong>Client:</strong> <span id="modalClientName"></span></p>
+                <p><strong>Entreprise:</strong> <span id="modalCompanyName"></span></p>
+                
+                <div class="form-group">
+                    <label for="reviewLinkInput">Lien de l'avis Google</label>
+                    <input type="url" id="reviewLinkInput" placeholder="https://maps.google.com/..." class="form-control">
+                    <small>Ce lien sera visible par le client comme preuve de l'avis publié</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="saveReviewLink()">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="public/js/admin-config.js"></script>
+    <script src="public/js/admin.js"></script>
+</body>
+</html>
