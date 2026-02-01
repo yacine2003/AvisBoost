@@ -10,6 +10,13 @@
 
     <!-- PAGE 1: CONNEXION/INSCRIPTION -->
     <div class="page active" id="authPage">
+        <!-- Bouton retour à l'accueil -->
+        <div style="position: absolute; top: 24px; left: 24px;">
+            <a href="index.html" class="back-link">
+                ← Retour à l'accueil
+            </a>
+        </div>
+        
         <div class="card">
             <div class="logo">⭐</div>
             
@@ -69,6 +76,13 @@
 
     <!-- PAGE 2: CONFIGURATION COMMANDE -->
     <div class="page" id="orderPage">
+        <!-- Bouton retour -->
+        <div style="position: absolute; top: 24px; left: 24px;">
+            <a href="index.html" class="back-link">
+                ← Retour à l'accueil
+            </a>
+        </div>
+        
         <div class="card">
             <div class="logo">📦</div>
             <h1>Créer une commande</h1>
@@ -131,10 +145,10 @@
     <div class="page dashboard" id="dashboardPage" style="padding: 0;">
         <div style="width: 100%;">
             <nav class="navbar">
-                <div class="nav-brand">
+                <a href="index.html" class="nav-brand" style="cursor: pointer; text-decoration: none; color: inherit;">
                     <div class="nav-logo">⭐</div>
                     <span>Dashboard AvisBoost</span>
-                </div>
+                </a>
                 <div style="display: flex; gap: 12px; align-items: center;">
                     <button class="btn-logout" onclick="showOrderPage()">Nouvelle commande</button>
                     <button class="btn-logout" onclick="handleLogout()">Déconnexion</button>
@@ -181,8 +195,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="public/js/config.js?v=4"></script>
-    <script src="public/js/app.js?v=4"></script>
+    <script src="public/js/config.js?v=6"></script>
+    <script src="public/js/app.js?v=6"></script>
 
 </body>
 </html>
